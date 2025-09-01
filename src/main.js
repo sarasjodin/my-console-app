@@ -1,4 +1,4 @@
-import './style.css';
+import '/src/style.css';
 
 function normalizePath(pathname) {
   const p = (pathname || '/').replace(/\/+$/, '');
