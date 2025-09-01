@@ -128,3 +128,29 @@ window.addEventListener('securitypolicyviolation', (e) => {
     e.originalPolicy
   );
 });
+
+function showProgramPanelOnce() {
+  const iframe = document.getElementById('csRunner');
+  if (!iframe) return;
+
+  // Sätt sandbox/allow INNAN src, men bara första gången
+  if (!iframe.dataset.loaded) {
+    iframe.setAttribute(
+      'sandbox',
+      'allow-scripts allow-forms allow-popups allow-same-origin'
+    );
+    iframe.setAttribute('referrerpolicy', 'no-referrer');
+    iframe.src = iframe.dataset.src || 'https://dotnetfiddle.net/Widget/fx2SpT';
+    iframe.dataset.loaded = '1';
+  }
+}
+
+// Kör vid start om #program eller ingen hash
+window.addEventListener('DOMContentLoaded', () => {
+  if (!location.hash || location.hash === '#program') showProgramPanelOnce();
+});
+
+// Kör vid flikbyte/hoppa till #program
+window.addEventListener('hashchange', () => {
+  if (location.hash === '#program') showProgramPanelOnce();
+});
