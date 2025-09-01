@@ -254,7 +254,7 @@ button:focus-visible {
   height: 20px;
 }
 
-.tab-content {
+.tab-content[aria-hidden='true'] {
   display: none;
 }
 
