@@ -12,6 +12,28 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [2.0.0] – 2025-09-01
+
+### Added
+
+- Console app that embeds **.NET Fiddle** to run and display C# console code.
+- Initial sample program: **Zeller’s algorithm**.
+
+### Removed
+
+- Temporarily removed CI configs: `.github/workflows/codeql.yml`, `.github/dependabot.yml`.
+  These will be reintroduced once the configuration is finalized.
+
+### Notes
+
+- Semantic version bump to 2.0.0 to mark the new embedded runner experience.
+
+### Security
+
+- Program view loads the runner in a sandboxed, cross-origin iframe with a strict CSP (route-scoped).
+
+---
+
 ## [1.0.3] – 2025-07-02
 
 ### Changed

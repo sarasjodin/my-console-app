@@ -1,7 +1,5 @@
-// /src/main.js
 import './style.css';
 
-// ---------------------- Hjälpare ----------------------
 function normalizePath(pathname) {
   const p = (pathname || '/').replace(/\/+$/, '');
   return p === '' ? '/' : p;
@@ -10,7 +8,7 @@ function normalizePath(pathname) {
 function extractFiddleLink(widgetUrl) {
   try {
     const u = new URL(widgetUrl, location.href);
-    const id = u.pathname.split('/').pop(); // /Widget/fx2SpT → fx2SpT
+    const id = u.pathname.split('/').pop(); //
     return `https://dotnetfiddle.net/${id}`;
   } catch {
     return null;
@@ -72,9 +70,8 @@ function setActivePanel(panelId) {
   if (panelId === 'program') ensureProgramIframeLoaded();
 }
 
-// ---------------------- Init ----------------------
 window.addEventListener('DOMContentLoaded', () => {
-  // Route → panel
+  // Route till panel
   const path = normalizePath(location.pathname);
   const routeMap = {
     '/': 'program', // om root inte redan redirectas till /program
@@ -87,7 +84,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const fromHash = location.hash ? location.hash.slice(1) : null;
   setActivePanel(fromRoute || fromHash || 'program');
 
-  // 2) Stöd för hash-flikar om du byter href till #program/#about i framtiden
+  // 2) Stöd för hash-flikar om jag byter href till #program/#about i framtiden
   document.querySelectorAll('.tabs a[href^="#"]').forEach((a) => {
     a.addEventListener('click', (e) => {
       e.preventDefault();

@@ -69,7 +69,6 @@ p {
   margin-bottom: 15px;
 }
 
-/* Länkar */
 a {
   font-family: 'Lucida Console', monospace;
   color: #ff0;
@@ -276,10 +275,10 @@ section .tab-content {
 }
 
 .code-sections {
-  display: flex; /* Gör så att de staplas horisontellt */
+  display: flex;
   justify-content: space-between;
-  gap: 20px; /* Avstånd mellan sektionerna */
-  width: 100%; /* Full bredd */
+  gap: 20px;
+  width: 100%;
   height: 100%;
 }
 
@@ -367,8 +366,8 @@ footer span {
 }
 
 main {
-  flex-grow: 1; /* Make main content take up remaining space */
-  overflow: hidden; /* Prevent scrollbars on the whole main section */
+  flex-grow: 1;
+  overflow: hidden;
 }
 
 #program,
@@ -380,11 +379,10 @@ main {
   padding-bottom: 65px;
 }
 
-/* Gör så att section fungerar som en flex-container */
 section {
   display: flex;
   flex-direction: column;
-  flex: 1; /* Fyller hela höjden inom main */
+  flex: 1;
   height: 100%;
   width: 100%;
 }
@@ -393,15 +391,14 @@ section {
 .tab-content #program .tab-content #code-section {
   display: flex;
   flex-direction: column;
-  flex: 1; /* Fyller hela höjden inom main */
+  flex: 1;
 }
 
 .tab-content #code {
   display: flex;
-  flex: 1; /* Fyller hela höjden inom main */
+  flex: 1;
 }
 
-/* Gör så att scrollable-content fyller all höjd inom sin sektion */
 .scrollable-content {
   flex-grow: 1;
   display: flex;
@@ -425,9 +422,9 @@ section {
 }
 
 .container {
-  max-width: 1200px; /* Begränsa bredden på sidan till 1200px */
-  margin: 0 auto; /* Centrerar containern */
-  padding: 0 20px; /* Lite padding runt innehållet */
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
   height: calc(100vh - 100px);
   width: 100%;
 }
@@ -439,13 +436,6 @@ footer h3 {
 pre {
   padding-left: 15px;
 }
-
-/* #program.tab-content {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-} */
 
 .runner-shell {
   display: flex;
@@ -469,17 +459,27 @@ pre {
 }
 
 @media (max-width: 550px) {
+  html,
   body {
-    display: none; /* göm hela sidan */
+    height: 100%;
+  }
+
+  /* Lås scroll om du vill */
+  body {
+    overflow: hidden;
   }
 
   body::before {
     content: 'Den här sidan är inte tillgänglig på mobila enheter.';
-    display: block;
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
     padding: 2rem;
     text-align: center;
     background: #111;
     color: #fff;
-    font-family: sans-serif;
+    z-index: 2147483647;
+    font: 600 1rem/1.4 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   }
 }
