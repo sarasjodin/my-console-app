@@ -117,3 +117,14 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content;
+
+window.addEventListener('securitypolicyviolation', (e) => {
+  console.log(
+    'CSP blocked:',
+    e.blockedURI,
+    e.violatedDirective,
+    e.originalPolicy
+  );
+});
