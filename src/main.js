@@ -135,10 +135,7 @@ function showProgramPanelOnce() {
 
   // Sätt sandbox/allow INNAN src, men bara första gången
   if (!iframe.dataset.loaded) {
-    iframe.setAttribute(
-      'sandbox',
-      'allow-scripts allow-forms allow-popups allow-same-origin'
-    );
+    iframe.setAttribute('sandbox', 'allow-scripts allow-forms allow-popups allow-same-origin');
     iframe.setAttribute('referrerpolicy', 'no-referrer');
     iframe.src = iframe.dataset.src || 'https://dotnetfiddle.net/Widget/fx2SpT';
     iframe.dataset.loaded = '1';
