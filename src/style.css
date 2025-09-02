@@ -95,6 +95,10 @@ a:hover {
   padding-top: 40px;
 }
 
+#navLinks {
+  display: none;
+}
+
 nav {
   display: flex;
   justify-content: space-between;

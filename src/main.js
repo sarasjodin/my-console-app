@@ -115,11 +115,6 @@ function migrateHashToPathIfNeeded() {
 
 window.addEventListener('popstate', () => routeTo(location.pathname));
 
-// ---------- CSP debug ----------
-window.addEventListener('securitypolicyviolation', (e) => {
-  console.log('CSP blocked:', e.blockedURI, e.violatedDirective);
-});
-
 // ---------- Boot ----------
 window.addEventListener('DOMContentLoaded', () => {
   setupNav();
@@ -132,75 +127,74 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 // ---------- Hamburgermeny ----------
-document.getElementById('hamburgerMenu').addEventListener('click', function () {
-  const menu = document.getElementById('navLinks');
-  menu.classList.toggle('active'); // Växlar mellan att visa/dölja menyn
-  trigger.setAttribute('role', 'button');
-  trigger.setAttribute('aria-controls', 'navLinks');
-  trigger.setAttribute('aria-expanded', 'false');
-  trigger.setAttribute('tabindex', '0');
+(function () {
+  function init() {
+    const btn = document.getElementById('hamburgerMenu');
+    const menu = document.getElementById('navLinks');
+    if (!btn || !menu) return;
 
-  // Hjälpare
-  const firstFocusable = () =>
-    menu.querySelector('a, button, [tabindex]:not([tabindex="-1"])');
+    const OPEN = 'active';
 
-  function openMenu() {
-    menu.classList.add('open'); // styr visning i CSS
-    document.body.classList.add('no-scroll');
-    trigger.setAttribute('aria-expanded', 'true');
-    const first = firstFocusable();
-    if (first) first.focus();
-    // Lyssna globalt för att stänga
-    window.addEventListener('click', onWindowClick, { capture: true });
-    window.addEventListener('keydown', onKeyDown, true);
-  }
+    // lite ARIA
+    btn.setAttribute('role', 'button');
+    btn.setAttribute('aria-controls', 'navLinks');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('tabindex', '0');
 
-  function closeMenu() {
-    if (!menu.classList.contains('open')) return;
-    menu.classList.remove('open');
-    document.body.classList.remove('no-scroll');
-    trigger.setAttribute('aria-expanded', 'false');
-    trigger.focus();
-    window.removeEventListener('click', onWindowClick, { capture: true });
-    window.removeEventListener('keydown', onKeyDown, true);
-  }
-
-  function toggleMenu() {
-    if (menu.classList.contains('open')) closeMenu();
-    else openMenu();
-  }
-
-  // Stäng vid klick utanför men lämna klick inuti menyn i fred
-  function onWindowClick(e) {
-    const t = e.target;
-    if (t === trigger || trigger.contains(t)) return; // klick på knappen
-    if (menu.contains(t)) return; // klick inuti menyn
-    closeMenu();
-  }
-
-  // Stöd för Esc + Enter/Space
-  function onKeyDown(e) {
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      closeMenu();
+    function open() {
+      if (menu.classList.contains(OPEN)) return;
+      menu.classList.add(OPEN);
+      btn.setAttribute('aria-expanded', 'true');
+      // Globala lyssnare medan menyn är öppen
+      document.addEventListener('click', onDocClick, true);
+      document.addEventListener('keydown', onKeyDown, true);
     }
-  }
-  function onTriggerKey(e) {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      toggleMenu();
+
+    function close() {
+      if (!menu.classList.contains(OPEN)) return;
+      menu.classList.remove(OPEN);
+      btn.setAttribute('aria-expanded', 'false');
+      document.removeEventListener('click', onDocClick, true);
+      document.removeEventListener('keydown', onKeyDown, true);
     }
+
+    function toggle() {
+      menu.classList.contains(OPEN) ? close() : open();
+    }
+
+    function onDocClick(e) {
+      const t = e.target;
+      if (t === btn || btn.contains(t)) return; // klick på knappen
+      if (menu.contains(t)) return; // klick i menyn
+      close(); // klick utanför stänger
+    }
+
+    function onKeyDown(e) {
+      if (e.key === 'Escape') close();
+      if ((e.key === 'Enter' || e.key === ' ') && e.target === btn) {
+        e.preventDefault();
+        toggle();
+      }
+    }
+
+    // Enda permanenta lyssnarna
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggle();
+    });
+    menu.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
+    // Stäng om fönstret ändrar storlek
+    window.addEventListener('resize', () => {
+      if (menu.classList.contains(OPEN)) close();
+    });
   }
 
-  trigger.addEventListener('click', (e) => {
-    e.stopPropagation(); // så window-click inte stänger direkt
-    toggleMenu();
-  });
-  trigger.addEventListener('keydown', onTriggerKey);
-
-  // Klick på länk i menyn stänger menyn
-  menu.addEventListener('click', (e) => {
-    const a = e.target.closest('a');
-    if (a) closeMenu();
-  });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();
