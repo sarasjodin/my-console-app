@@ -1,15 +1,30 @@
+// src/main.js
 import '/src/style.css';
 
+// ---------- Hjälpare ----------
 function normalizePath(pathname) {
   const p = (pathname || '/').replace(/\/+$/, '');
   return p === '' ? '/' : p;
 }
 
+function isInternal(url) {
+  return url.origin === location.origin;
+}
+
+function $(sel, root = document) {
+  return root.querySelector(sel);
+}
+function $all(sel, root = document) {
+  return Array.from(root.querySelectorAll(sel));
+}
+
+// ---------- DOTNET Fiddle utils ----------
 function extractFiddleLink(widgetUrl) {
   try {
+    if (!widgetUrl) return null;
     const u = new URL(widgetUrl, location.href);
-    const id = u.pathname.split('/').pop(); //
-    return `https://dotnetfiddle.net/${id}`;
+    const id = u.pathname.split('/').pop();
+    return id ? `https://dotnetfiddle.net/${id}` : null;
   } catch {
     return null;
   }
@@ -19,135 +34,173 @@ function ensureProgramIframeLoaded() {
   const iframe = document.getElementById('csRunner');
   if (!iframe) return;
 
-  // .NET Fiddle kräver same-origin i sandlådan för att XHR till /Home/Run inte ska bli CORS-blockat
-  const base = 'allow-scripts allow-forms';
-  const needSameOrigin = true;
+  // Ladda bara första gången
+  if (!iframe.dataset.loaded) {
+    const url = iframe.dataset.src || 'https://dotnetfiddle.net/Widget/fx2SpT';
+    iframe.src = url;
+    iframe.dataset.loaded = '1';
 
-  // Viktigt: sätt sandbox INNAN src
-  iframe.setAttribute(
-    'sandbox',
-    needSameOrigin ? `${base} allow-same-origin` : base
-  );
-  if (!iframe.getAttribute('referrerpolicy'))
-    iframe.setAttribute('referrerpolicy', 'no-referrer');
-  if (!iframe.getAttribute('allow'))
-    iframe.setAttribute('allow', 'clipboard-write');
-
-  if (!iframe.src) {
-    const url = iframe.dataset.src;
-    if (url) iframe.src = url;
+    // Fallback-länken pekar på "view"-URL (inte widget)
+    const fb = document.getElementById('runnerFallbackLink');
+    if (fb) {
+      fb.href = extractFiddleLink(url) || fb.href || '#';
+      fb.setAttribute('rel', 'noopener noreferrer');
+      fb.setAttribute('target', '_blank');
+    }
   }
-
-  // Fallback-länk
-  const fb = document.getElementById('runnerFallbackLink');
-  if (fb) fb.href = extractFiddleLink(iframe.dataset.src || iframe.src) || '#';
 }
 
+// ---------- UI / Tabbar ----------
 function setActivePanel(panelId) {
-  if (!panelId) return;
-
   // Dölj alla paneler
-  document.querySelectorAll('.tab-content').forEach((sec) => {
-    sec.setAttribute('aria-hidden', 'true');
-  });
+  $all('.tab-content').forEach((sec) =>
+    sec.setAttribute('aria-hidden', 'true')
+  );
 
-  // Visa vald panel
+  // Visa vald
   const panel = document.getElementById(panelId);
   if (panel) panel.setAttribute('aria-hidden', 'false');
 
-  // Uppdatera aktiv länk (aria-current)
-  document.querySelectorAll('.tabs a').forEach((a) => {
-    const href = (a.getAttribute('href') || '').replace(/\/+$/, '') || '/';
-    const pathMatch =
-      href === `/${panelId}` ||
-      (panelId === 'program' && href === '/') ||
-      href === `#${panelId}`;
-    if (pathMatch) a.setAttribute('aria-current', 'page');
+  // Uppdatera aria-current på flikar
+  $all('.tabs a[data-tab]').forEach((a) => {
+    const tab = a.getAttribute('data-tab');
+    if (tab === panelId) a.setAttribute('aria-current', 'page');
     else a.removeAttribute('aria-current');
   });
 
-  // Lazy-load av iframen när Program aktiveras
+  // Lazy-load runnern endast på Program
   if (panelId === 'program') ensureProgramIframeLoaded();
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  // Route till panel
-  const path = normalizePath(location.pathname);
-  const routeMap = {
-    '/': 'program', // om root inte redan redirectas till /program
+function routeTo(pathname) {
+  const map = {
+    '/': 'program',
     '/program': 'program',
     '/about': 'about'
   };
+  const id = map[normalizePath(pathname)] || 'program';
+  setActivePanel(id);
+}
 
-  // 1) Sätt panel från path (eller hash som fallback)
-  const fromRoute = routeMap[path];
-  const fromHash = location.hash ? location.hash.slice(1) : null;
-  setActivePanel(fromRoute || fromHash || 'program');
+// ---------- Navigation ----------
+function onNavClick(e) {
+  const target = e.target.closest('a[data-tab]');
+  if (!target) return;
 
-  // 2) Stöd för hash-flikar om jag byter href till #program/#about i framtiden
-  document.querySelectorAll('.tabs a[href^="#"]').forEach((a) => {
-    a.addEventListener('click', (e) => {
-      e.preventDefault();
-      const id = a.getAttribute('href').slice(1);
-      setActivePanel(id);
-      history.replaceState(null, '', `#${id}`);
-    });
-  });
+  const href = target.getAttribute('href') || '/';
+  const url = new URL(href, location.origin);
 
-  // 3) Hash-navigering via back/forward
-  window.addEventListener('hashchange', () => {
-    const id = location.hash.slice(1);
-    if (id) setActivePanel(id);
-  });
-
-  // 4) Hamburgermeny (skydda mot null)
-  const hamburger = document.getElementById('hamburgerMenu');
-  const menu = document.querySelector('nav ul#navLinks');
-  if (hamburger && menu) {
-    hamburger.addEventListener('click', (e) => {
-      e.stopPropagation();
-      menu.classList.toggle('active');
-    });
-    document.addEventListener('click', (e) => {
-      if (menu.classList.contains('active')) {
-        if (!menu.contains(e.target) && e.target !== hamburger) {
-          menu.classList.remove('active');
-        }
-      }
-    });
-  }
-});
-
-document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content;
-
-window.addEventListener('securitypolicyviolation', (e) => {
-  console.log(
-    'CSP blocked:',
-    e.blockedURI,
-    e.violatedDirective,
-    e.originalPolicy
-  );
-});
-
-function showProgramPanelOnce() {
-  const iframe = document.getElementById('csRunner');
-  if (!iframe) return;
-
-  // Sätt sandbox/allow INNAN src, men bara första gången
-  if (!iframe.dataset.loaded) {
-    iframe.setAttribute('sandbox', 'allow-scripts allow-forms allow-popups allow-same-origin');
-    iframe.setAttribute('referrerpolicy', 'no-referrer');
-    iframe.src = iframe.dataset.src || 'https://dotnetfiddle.net/Widget/fx2SpT';
-    iframe.dataset.loaded = '1';
+  // Intern länk med client-side navigering
+  if (isInternal(url)) {
+    e.preventDefault();
+    history.pushState(null, '', url.pathname);
+    routeTo(url.pathname);
   }
 }
 
-// Kör vid start om #program eller ingen hash
-window.addEventListener('DOMContentLoaded', () => {
-  if (!location.hash || location.hash === '#program') showProgramPanelOnce();
+// Tillåt även keyboard med Enter/Space om knappar/roles på li
+function setupNav() {
+  const nav = document.querySelector('nav');
+  if (nav) nav.addEventListener('click', onNavClick);
+}
+
+// ---------- Hash-backcompat & popstate ----------
+function migrateHashToPathIfNeeded() {
+  if (location.hash === '#program') {
+    history.replaceState(null, '', '/program');
+  } else if (location.hash === '#about') {
+    history.replaceState(null, '', '/about');
+  }
+}
+
+window.addEventListener('popstate', () => routeTo(location.pathname));
+
+// ---------- CSP debug ----------
+window.addEventListener('securitypolicyviolation', (e) => {
+  console.log('CSP blocked:', e.blockedURI, e.violatedDirective);
 });
 
-// Kör vid flikbyte/hoppa till #program
-window.addEventListener('hashchange', () => {
-  if (location.hash === '#program') showProgramPanelOnce();
+// ---------- Boot ----------
+window.addEventListener('DOMContentLoaded', () => {
+  setupNav();
+
+  // Backcompat för gamla bokmärken
+  migrateHashToPathIfNeeded();
+
+  // Starta rätt vy
+  routeTo(location.pathname);
 });
+
+// ---------- Hamburgermeny ----------
+document.getElementById('hamburgerMenu').addEventListener('click', function () {
+  const menu = document.getElementById('navLinks');
+  menu.classList.toggle('active'); // Växlar mellan att visa/dölja menyn
+  trigger.setAttribute('role', 'button');
+  trigger.setAttribute('aria-controls', 'navLinks');
+  trigger.setAttribute('aria-expanded', 'false');
+  trigger.setAttribute('tabindex', '0');
+
+  // Hjälpare
+  const firstFocusable = () =>
+    menu.querySelector('a, button, [tabindex]:not([tabindex="-1"])');
+
+  function openMenu() {
+    menu.classList.add('open'); // styr visning i CSS
+    document.body.classList.add('no-scroll');
+    trigger.setAttribute('aria-expanded', 'true');
+    const first = firstFocusable();
+    if (first) first.focus();
+    // Lyssna globalt för att stänga
+    window.addEventListener('click', onWindowClick, { capture: true });
+    window.addEventListener('keydown', onKeyDown, true);
+  }
+
+  function closeMenu() {
+    if (!menu.classList.contains('open')) return;
+    menu.classList.remove('open');
+    document.body.classList.remove('no-scroll');
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.focus();
+    window.removeEventListener('click', onWindowClick, { capture: true });
+    window.removeEventListener('keydown', onKeyDown, true);
+  }
+
+  function toggleMenu() {
+    if (menu.classList.contains('open')) closeMenu();
+    else openMenu();
+  }
+
+  // Stäng vid klick utanför men lämna klick inuti menyn i fred
+  function onWindowClick(e) {
+    const t = e.target;
+    if (t === trigger || trigger.contains(t)) return; // klick på knappen
+    if (menu.contains(t)) return; // klick inuti menyn
+    closeMenu();
+  }
+
+  // Stöd för Esc + Enter/Space
+  function onKeyDown(e) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeMenu();
+    }
+  }
+  function onTriggerKey(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggleMenu();
+    }
+  }
+
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation(); // så window-click inte stänger direkt
+    toggleMenu();
+  });
+  trigger.addEventListener('keydown', onTriggerKey);
+
+  // Klick på länk i menyn stänger menyn
+  menu.addEventListener('click', (e) => {
+    const a = e.target.closest('a');
+    if (a) closeMenu();
+  });
+})();
