@@ -1,5 +1,5 @@
 // src/navbar.js
-import './styles.css';
+import './style.css';
 
 function $(sel, root = document) {
   return root.querySelector(sel);
