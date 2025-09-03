@@ -1,5 +1,5 @@
-// src/navbar.js
-import '/src/style.css';
+// src/accessibility-statement.js
+import './navbar.js';
 
 function $(sel, root = document) {
   return root.querySelector(sel);
