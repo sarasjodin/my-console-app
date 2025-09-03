@@ -1,9 +1,10 @@
-# My C# Console app
-<a href="[My retro console app(https://my-console-app.netlify.app/)]" target="_blank" rel="noopener noreferrer">
-Open Live Demo
-</a> <br><br>
+# My retro C# Console app
+[Open Live Demo](https://my-console-app.netlify.app)
+<br><br>
 
-[![Netlify Status badge or similar]]
+[![Netlify Status](https://api.netlify.com/api/v1/badges/d69d10f5-a057-403c-a1d0-b96b503c90c2/deploy-status)](https://app.netlify.com/projects/my-console-app/deploys)
+
+<img width="auto" height="auto" alt="Home page of my console application" src="https://github.com/user-attachments/assets/f0e17bb3-aad3-4beb-841f-e8462c6ff69c" />
 
 ---
 
@@ -39,10 +40,12 @@ Clone the repo and install dependencies:
 ```bash
 npm install
 npm run dev
+```
 
 ## Folder Structure
 
-<img src="" alt="folder structure" width="150"/>
+<img width="150" height="770" alt="folder structure" src="https://github.com/user-attachments/assets/eb878a9f-fbf9-41ce-8d4d-a24cc47e16cc" />
+
 
 ---
 
