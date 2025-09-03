@@ -1,6 +1,5 @@
 # My C# Console app
-
-<a href="https://your-deployment-link" target="_blank" rel="noopener noreferrer">
+<a href="[My retro console app(https://my-console-app.netlify.app/)]" target="_blank" rel="noopener noreferrer">
 Open Live Demo
 </a> <br><br>
 
@@ -8,37 +7,38 @@ Open Live Demo
 
 ---
 
-## Features
+## About This Project
+This project is a **web application** that embeds and runs simple **C# console applications** directly in the browser.  
+The first demo app calculates the **day of the week** for a given date using **Zeller’s algorithm**.  
 
-- ✅ [Feature 1]
-- ✅ [Feature 2]
-- 🔍 Focus on [performance, accessibility, modularity, etc.]
+Purpose:  
+- Showcase and test C# console apps in a safe, sandboxed environment  
+- Experiment with embedding external runners (e.g., Try .NET Fiddle)  
+- Serve as a learning project focusing on **security, accessibility, and minimal design**  
+
+---
+
+## Features
+- ✅ Embed and run C# console apps in-browser (via iframe, sandboxed)  
+- ✅ Day-of-week calculator (Zeller’s algorithm)  
+- 🔍 Focus on **security, accessibility, and modular design**  
 
 ---
 
 ## Tech Stack
-
-- HTML / CSS / [JavaScript or TypeScript] / etc.
-- [Vite / Parcel / other build tool] / etc.
-- [Any other tools or APIs] / etc.
-- Netlify (for deployment) / etc.
+- HTML / CSS / JavaScript (Vite as build tool)  
+- Netlify (static hosting & deployment)  
+- External sandbox runners: **.NET Fiddle** (for C#)  
+- Planned: JupyterLite or Pyodide (for Python integration in the future)  
 
 ---
 
 ## Installation
+Clone the repo and install dependencies:
 
 ```bash
 npm install
 npm run dev
-```
-
----
-
-## About This Project
-
-[Brief description of what the project is, what it does, and its purpose. Include main functionality, design ideas, or any learning goals.]
-
----
 
 ## Folder Structure
 
@@ -48,9 +48,9 @@ npm run dev
 
 ## Security
 
-- ✅ Dependabot active
+- ✅ Dependabot active for keeping dependencies updated
 - ✅ Security policy configured
-- ✅ Automatic CodeQL analysis
+- ✅ Strict Content-Security-Policy (CSP) with sandboxed iframes
 
 ---
 
